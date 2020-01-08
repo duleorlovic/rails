@@ -178,7 +178,13 @@ module ActiveRecord
         end
 
         _enum_methods_module.module_eval do
-          pairs = values.respond_to?(:each_pair) ? values.each_pair : values.each_with_index
+          pairs = if values.respond_to?(:each_pair)
+            values.each_pair # [:unread, 0], [:reading, 2]
+          elsif klass.columns_hash[name].present? && %i[string text].include?(klass.columns_hash[name].type)
+            values.each_with_object({}) { |v, o| o[v] = v.to_s } # [:hard, 'hard'], [:soft, 'soft']
+          else
+            values.each_with_index # [:proposed, 0], [:written, 1]
+          end
           pairs.each do |label, value|
             if enum_prefix == true
               prefix = "#{name}_"

@@ -569,6 +569,11 @@ class EnumTest < ActiveRecord::TestCase
     assert_predicate book, :hard?
   end
 
+  test "uses strings when column is string" do
+    book = Book.new cover: "soft"
+    assert_equal "soft", book.cover_before_type_cast
+  end
+
   test "data type of Enum type" do
     assert_equal :integer, Book.type_for_attribute("status").type
   end
